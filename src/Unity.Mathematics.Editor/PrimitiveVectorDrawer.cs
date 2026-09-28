@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -36,18 +36,20 @@ namespace Unity.Mathematics.Editor
             public static readonly string doNotNormalizeCompatibility = L10n.Tr(
                 $"{typeof(DoNotNormalizeAttribute).Name} only works with {typeof(quaternion)} and primitive vector types."
             );
-            public static readonly string doNotNormalizeTooltip =
-                L10n.Tr("This value is not normalized, which may produce unexpected results.");
+            public static readonly GUIContent doNotNormalizeContent = new GUIContent("", 
+                L10n.Tr("This value is not normalized, which may produce unexpected results."));
 
             public static readonly GUIContent[] labels2 = { new GUIContent("X"), new GUIContent("Y") };
             public static readonly GUIContent[] labels3 = { new GUIContent("X"), new GUIContent("Y"), new GUIContent("Z") };
             public static readonly GUIContent[] labels4 = { new GUIContent("X"), new GUIContent("Y"), new GUIContent("Z"), new GUIContent("W") };
         }
 
+#if !UNITY_2023_2_OR_NEWER
         public override bool CanCacheInspectorGUI(SerializedProperty property)
         {
             return false;
         }
+#endif
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -87,8 +89,10 @@ namespace Unity.Mathematics.Editor
             }
 
             if (attribute is DoNotNormalizeAttribute && string.IsNullOrEmpty(label.tooltip))
-                label.tooltip = Content.doNotNormalizeTooltip;
-
+            {
+                Content.doNotNormalizeContent.text = label.text;
+                label = Content.doNotNormalizeContent;
+            }
             label = EditorGUI.BeginProperty(position, label, property);
             var valuesIterator = property.FindPropertyRelative(startIter);
             MultiPropertyField(position, subLabels, valuesIterator, label);
